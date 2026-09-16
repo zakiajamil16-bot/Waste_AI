@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>WasteWise AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #e8f5e9, #f4fbf5);
+            min-height: 100vh;
+            color: #18351d;
+        }
+
+        .header {
+            padding: 22px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #176b2c;
+        }
+
+        .badge {
+            background: #dff4e3;
+            color: #176b2c;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .main {
+            width: 92%;
+            max-width: 850px;
+            margin: 20px auto 50px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .hero h1 {
+            font-size: 46px;
+            margin: 0;
+            color: #124d21;
+        }
+
+        .hero p {
+            color: #607064;
+            font-size: 17px;
+            margin-top: 12px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 28px;
+            padding: 35px;
+            box-shadow: 0 18px 50px rgba(27, 80, 35, 0.12);
+        }
+
+        .upload-area {
+            border: 2px dashed #72b87c;
+            border-radius: 22px;
+            padding: 35px 20px;
+            text-align: center;
+            background: #f9fffa;
+        }
+
+        .camera {
+            font-size: 58px;
+        }
+
+        .upload-area h2 {
+            margin: 12px 0 6px;
+            color: #205b2b;
+        }
+
+        .upload-area p {
+            color: #718075;
+            margin-bottom: 24px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            border-radius: 14px;
+            padding: 15px 22px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .camera-btn {
+            background: #218739;
+            color: white;
+        }
+
+        .gallery-btn {
+            background: #e8f5ea;
+            color: #176b2c;
+            border: 1px solid #b9dfbf;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        input {
+            display: none;
+        }
+
+        #preview {
+            display: none;
+            width: 100%;
+            max-height: 330px;
+            object-fit: contain;
+            margin-top: 25px;
+            border-radius: 18px;
+        }
+
+        .result-card {
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 20px;
+            background: #f5faf6;
+            display: none;
+        }
+
+        .result-title {
+            font-size: 14px;
+            color: #708073;
+            margin-bottom: 8px;
+        }
+
+        #prediction {
+            font-size: 29px;
+            font-weight: 800;
+            margin-bottom: 18px;
+        }
+
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 7px;
+            color: #526158;
+        }
+
+        .bar {
+            height: 12px;
+            background: #dfe9e1;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        #confidenceBar {
+            height: 100%;
+            width: 0%;
+            border-radius: 20px;
+            transition: width 0.8s ease;
+            background: #2e8b42;
+        }
+
+        #confidenceText {
+            font-weight: bold;
+        }
+
+        .tip {
+            margin-top: 20px;
+            padding: 15px;
+            background: #edf8ef;
+            border-radius: 14px;
+            color: #416148;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 18px;
+            color: #31703b;
+            font-weight: bold;
+        }
+
+        .dot {
+            display: inline-block;
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #809084;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+
+            .header {
+                padding: 18px 5%;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .card {
+                padding: 20px;
+                border-radius: 22px;
+            }
+
+            .upload-area {
+                padding: 28px 15px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <header class="header">
+
+        <div class="logo">
+            ♻️ WasteWise AI
+        </div>
+
+        <div class="badge">
+            AI Waste Classifier
+        </div>
+
+    </header>
+
+
+    <main class="main">
+
+        <section class="hero">
+
+            <h1>Smart Waste Segregation</h1>
+
+            <p>
+                Identify your waste and make smarter disposal decisions.
+            </p>
+
+        </section>
+
+
+        <div class="card">
+
+            <div class="upload-area">
+
+                <div class="camera">
+                    📸
+                </div>
+
+                <h2>Classify Your Waste</h2>
+
+                <p>
+                    Take a photo of your waste to let AI analyze it.
+                </p>
+
+
+                <div class="buttons">
+
+                    <button
+                        class="camera-btn"
+                        onclick="openCamera()">
+
+                        📸 Take Photo
+
+                    </button>
+
+
+                    <button
+                        class="gallery-btn"
+                        onclick="openGallery()">
+
+                        🖼️ Choose Image
+
+                    </button>
+
+                </div>
+
+
+                <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    id="cameraInput"
+                >
+
+
+                <input
+                    type="file"
+                    id="galleryInput"
+                >
+
+
+                <img id="preview">
+
+            </div>
+
+
+            <div
+                id="loading"
+                class="loading"
+                style="display:none;">
+
+                🤖 AI is analyzing your waste
+                <span class="dot">...</span>
+
+            </div>
+
+
+            <div
+                id="resultCard"
+                class="result-card">
+
+                <div class="result-title">
+                    AI CLASSIFICATION
+                </div>
+
+
+                <div id="prediction">
+                    —
+                </div>
+
+
+                <div class="confidence-label">
+
+                    <span>Confidence</span>
+
+                    <span id="confidenceText">
+                        0%
+                    </span>
+
+                </div>
+
+
+                <div class="bar">
+
+                    <div id="confidenceBar"></div>
+
+                </div>
+
+
+                <div
+                    id="tip"
+                    class="tip">
+
+                    💡 Upload another image to classify more waste.
+
+                </div>
+
+            </div>
+
+
+            <div class="footer">
+
+                Powered by MobileNetV2 • WasteWise AI
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        const cameraInput =
+            document.getElementById("cameraInput");
+
+        const galleryInput =
+            document.getElementById("galleryInput");
+
+        const preview =
+            document.getElementById("preview");
+
+        const loading =
+            document.getElementById("loading");
+
+        const resultCard =
+            document.getElementById("resultCard");
+
+        const prediction =
+            document.getElementById("prediction");
+
+        const confidenceText =
+            document.getElementById("confidenceText");
+
+        const confidenceBar =
+            document.getElementById("confidenceBar");
+
+        const tip =
+            document.getElementById("tip");
+
+
+        function openCamera() {
+
+            cameraInput.click();
+
+        }
+
+
+        function openGallery() {
+
+            galleryInput.click();
+
+        }
+
+
+        async function processImage(file) {
+
+            if (!file) return;
+
+
+            preview.src =
+                URL.createObjectURL(file);
+
+            preview.style.display =
+                "block";
+
+
+            resultCard.style.display =
+                "none";
+
+
+            loading.style.display =
+                "block";
+
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                "image",
+                file
+            );
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/predict",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                loading.style.display =
+                    "none";
+
+
+                resultCard.style.display =
+                    "block";
+
+
+                prediction.innerText =
+                    data.prediction;
+
+
+                confidenceText.innerText =
+                    data.confidence + "%";
+
+
+                confidenceBar.style.width =
+                    data.confidence + "%";
+
+
+                if (
+                    data.prediction ===
+                    "BIODEGRADABLE"
+                ) {
+
+                    prediction.style.color =
+                        "#218739";
+
+                    tip.innerText =
+                        "🌱 This waste is biodegradable. Consider composting or disposing of it in the organic waste stream.";
+
+                } else {
+
+                    prediction.style.color =
+                        "#176b2c";
+
+                    tip.innerText =
+                        "♻️ This waste is non-biodegradable. Place it in the appropriate recyclable or dry-waste stream.";
+
+                }
+
+
+            } catch (error) {
+
+                loading.style.display =
+                    "none";
+
+                resultCard.style.display =
+                    "block";
+
+                prediction.innerText =
+                    "Something went wrong";
+
+                confidenceText.innerText =
+                    "—";
+
+                confidenceBar.style.width =
+                    "0%";
+
+                tip.innerText =
+                    "❌ Could not analyze the image. Please try again.";
+
+            }
+
+        }
+
+
+        cameraInput.addEventListener(
+            "change",
+            () => {
+
+                processImage(
+                    cameraInput.files[0]
+                );
+
+            }
+        );
+
+
+        galleryInput.addEventListener(
+            "change",
+            () => {
+
+                processImage(
+                    galleryInput.files[0]
+                );
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
