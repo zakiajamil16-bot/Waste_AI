@@ -1,5 +1,5 @@
 Flask
-tensorflow
 opencv-python-headless
 numpy
+ai-edge-litert
 gunicorn
