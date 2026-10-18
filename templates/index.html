@@ -212,7 +212,6 @@
             0%, 100% {
                 opacity: 0.3;
             }
-
             50% {
                 opacity: 1;
             }
@@ -226,24 +225,19 @@
         }
 
         @media (max-width: 600px) {
-
             .header {
                 padding: 18px 5%;
             }
-
             .hero h1 {
                 font-size: 36px;
             }
-
             .card {
                 padding: 20px;
                 border-radius: 22px;
             }
-
             .upload-area {
                 padding: 28px 15px;
             }
-
             button {
                 width: 100%;
             }
@@ -251,335 +245,184 @@
     </style>
 </head>
 
-
 <body>
 
     <header class="header">
-
         <div class="logo">
             ♻️ WasteWise AI
         </div>
-
-        <div class="badge">
+        <div class="badge" id="espStatusBadge">
             AI Waste Classifier
         </div>
-
     </header>
-
 
     <main class="main">
 
         <section class="hero">
-
             <h1>Smart Waste Segregation</h1>
-
             <p>
                 Identify your waste and make smarter disposal decisions.
             </p>
-
         </section>
-
 
         <div class="card">
 
             <div class="upload-area">
-
                 <div class="camera">
                     📸
                 </div>
 
                 <h2>Classify Your Waste</h2>
-
                 <p>
                     Take a photo of your waste to let AI analyze it.
                 </p>
 
-
                 <div class="buttons">
-
-                    <button
-                        class="camera-btn"
-                        onclick="openCamera()">
-
+                    <button class="camera-btn" onclick="openCamera()">
                         📸 Take Photo
-
                     </button>
 
-
-                    <button
-                        class="gallery-btn"
-                        onclick="openGallery()">
-
+                    <button class="gallery-btn" onclick="openGallery()">
                         🖼️ Choose Image
-
                     </button>
-
                 </div>
 
-
-                <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    id="cameraInput"
-                >
-
-
-                <input
-                    type="file"
-                    id="galleryInput"
-                >
-
+                <input type="file" accept="image/*" capture="environment" id="cameraInput">
+                <input type="file" id="galleryInput">
 
                 <img id="preview">
-
             </div>
 
-
-            <div
-                id="loading"
-                class="loading"
-                style="display:none;">
-
+            <div id="loading" class="loading" style="display:none;">
                 🤖 AI is analyzing your waste
                 <span class="dot">...</span>
-
             </div>
 
-
-            <div
-                id="resultCard"
-                class="result-card">
-
+            <div id="resultCard" class="result-card">
                 <div class="result-title">
                     AI CLASSIFICATION
                 </div>
-
 
                 <div id="prediction">
                     —
                 </div>
 
-
                 <div class="confidence-label">
-
                     <span>Confidence</span>
-
                     <span id="confidenceText">
                         0%
                     </span>
-
                 </div>
-
 
                 <div class="bar">
-
                     <div id="confidenceBar"></div>
-
                 </div>
 
-
-                <div
-                    id="tip"
-                    class="tip">
-
+                <div id="tip" class="tip">
                     💡 Upload another image to classify more waste.
-
                 </div>
-
             </div>
 
-
             <div class="footer">
-
                 Powered by MobileNetV2 • WasteWise AI
-
             </div>
 
         </div>
 
     </main>
 
-
     <script>
-
-        const cameraInput =
-            document.getElementById("cameraInput");
-
-        const galleryInput =
-            document.getElementById("galleryInput");
-
-        const preview =
-            document.getElementById("preview");
-
-        const loading =
-            document.getElementById("loading");
-
-        const resultCard =
-            document.getElementById("resultCard");
-
-        const prediction =
-            document.getElementById("prediction");
-
-        const confidenceText =
-            document.getElementById("confidenceText");
-
-        const confidenceBar =
-            document.getElementById("confidenceBar");
-
-        const tip =
-            document.getElementById("tip");
-
+        const cameraInput = document.getElementById("cameraInput");
+        const galleryInput = document.getElementById("galleryInput");
+        const preview = document.getElementById("preview");
+        const loading = document.getElementById("loading");
+        const resultCard = document.getElementById("resultCard");
+        const prediction = document.getElementById("prediction");
+        const confidenceText = document.getElementById("confidenceText");
+        const confidenceBar = document.getElementById("confidenceBar");
+        const tip = document.getElementById("tip");
+        const espStatusBadge = document.getElementById("espStatusBadge");
 
         function openCamera() {
-
             cameraInput.click();
-
         }
-
 
         function openGallery() {
-
             galleryInput.click();
-
         }
-
 
         async function processImage(file) {
-
             if (!file) return;
 
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = "block";
+            resultCard.style.display = "none";
+            loading.style.display = "block";
 
-            preview.src =
-                URL.createObjectURL(file);
-
-            preview.style.display =
-                "block";
-
-
-            resultCard.style.display =
-                "none";
-
-
-            loading.style.display =
-                "block";
-
-
-            const formData =
-                new FormData();
-
-            formData.append(
-                "image",
-                file
-            );
-
+            const formData = new FormData();
+            formData.append("image", file);
 
             try {
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    body: formData
+                });
 
-                const response =
-                    await fetch(
-                        "/predict",
-                        {
-                            method: "POST",
-                            body: formData
-                        }
-                    );
+                const data = await response.json();
 
+                loading.style.display = "none";
+                resultCard.style.display = "block";
 
-                const data =
-                    await response.json();
+                prediction.innerText = data.prediction;
+                confidenceText.innerText = data.confidence + "%";
+                confidenceBar.style.width = data.confidence + "%";
 
-
-                loading.style.display =
-                    "none";
-
-
-                resultCard.style.display =
-                    "block";
-
-
-                prediction.innerText =
-                    data.prediction;
-
-
-                confidenceText.innerText =
-                    data.confidence + "%";
-
-
-                confidenceBar.style.width =
-                    data.confidence + "%";
-
-
-                if (
-                    data.prediction ===
-                    "BIODEGRADABLE"
-                ) {
-
-                    prediction.style.color =
-                        "#218739";
-
-                    tip.innerText =
-                        "🌱 This waste is biodegradable. Consider composting or disposing of it in the organic waste stream.";
-
+                if (data.prediction === "BIODEGRADABLE") {
+                    prediction.style.color = "#218739";
+                    tip.innerText = "🌱 This waste is biodegradable. Consider composting or disposing of it in the organic waste stream.";
                 } else {
-
-                    prediction.style.color =
-                        "#176b2c";
-
-                    tip.innerText =
-                        "♻️ This waste is non-biodegradable. Place it in the appropriate recyclable or dry-waste stream.";
-
+                    prediction.style.color = "#176b2c";
+                    tip.innerText = "♻️ This waste is non-biodegradable. Place it in the appropriate recyclable or dry-waste stream.";
                 }
 
-
             } catch (error) {
-
-                loading.style.display =
-                    "none";
-
-                resultCard.style.display =
-                    "block";
-
-                prediction.innerText =
-                    "Something went wrong";
-
-                confidenceText.innerText =
-                    "—";
-
-                confidenceBar.style.width =
-                    "0%";
-
-                tip.innerText =
-                    "❌ Could not analyze the image. Please try again.";
-
+                loading.style.display = "none";
+                resultCard.style.display = "block";
+                prediction.innerText = "Something went wrong";
+                confidenceText.innerText = "—";
+                confidenceBar.style.width = "0%";
+                tip.innerText = "❌ Could not analyze the image. Please try again.";
             }
-
         }
 
+        cameraInput.addEventListener("change", () => {
+            processImage(cameraInput.files[0]);
+        });
 
-        cameraInput.addEventListener(
-            "change",
-            () => {
+        galleryInput.addEventListener("change", () => {
+            processImage(galleryInput.files[0]);
+        });
 
-                processImage(
-                    cameraInput.files[0]
-                );
+        // --- ESP32 AUTOMATIC POLLING BRIDGE ---
+        async function checkEspTrigger() {
+            try {
+                const response = await fetch("/check-status");
+                const data = await response.json();
 
+                if (data.capture_requested) {
+                    espStatusBadge.innerText = "⚡ ESP32 Triggered!";
+                    espStatusBadge.style.background = "#ffffe0";
+                    
+                    // Automatically trigger the camera input prompt
+                    cameraInput.click();
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
             }
-        );
+        }
 
-
-        galleryInput.addEventListener(
-            "change",
-            () => {
-
-                processImage(
-                    galleryInput.files[0]
-                );
-
-            }
-        );
-
+        // Poll every 1.5 seconds for ESP32 triggers
+        setInterval(checkEspTrigger, 1500);
     </script>
 
 </body>
