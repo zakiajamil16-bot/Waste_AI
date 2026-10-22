@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # Load the trained AI model
 interpreter = Interpreter(
-    model_path="waste_classifier.tflite",
+    model_path="waste_classifier_updated.tflite",
     num_threads=1
 )
 interpreter.allocate_tensors()
@@ -81,7 +81,6 @@ def predict():
         img = cv2.resize(img, (224, 224))
         img = img.astype(np.float32)
         img = np.expand_dims(img, axis=0)
-        img = (img / 127.5) - 1.0
 
         # Run the AI model
         interpreter.set_tensor(input_details[0]["index"], img)
